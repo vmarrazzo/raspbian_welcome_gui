@@ -26,7 +26,8 @@ emulationstation_cmd = "emulationstation"
 # Mapping of session name to sequence (of sequence) of command to execute
 session_commands = {'Raspbian': [],
                     'Kodi Media Center': [["kodi-standalone"]],
-                    'Emulation Station': [["sudo", "service", "lightdm", "stop"], emulationstation_cmd.split()]}
+                    'Emulation Station': [["sudo", "service", "lightdm", "stop"],
+                                          emulationstation_cmd.split()]}
 
 
 class RaspbianWelcomeGui:
@@ -130,8 +131,9 @@ def main():
 
     # separate thread that wait 60 seconds
     # after timeout it starts kodi as default option
-    timer = Timer(60, lambda arg=session_commands[default_session]: [logging.debug('Timeout occurs'),
-                                                                     gui.click(arg)])
+    commands = session_commands[default_session]
+    timer = Timer(60, lambda arg=commands: [logging.debug('Timeout occurs'),
+                                            gui.click(arg)])
     timer.dameon = True
 
     try:
