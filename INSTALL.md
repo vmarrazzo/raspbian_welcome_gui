@@ -12,4 +12,8 @@ adding the follow scripting line
 @/usr/bin/python <location_to_script>/raspbian_wellcome_gui.py
 ```
 
-and reboot
+and reboot rpi.
+
+### Additional info on installation
+
+After installation no keyboard is mandatory to use this application but the mouse (or a device that emulate it) yes. I am using this application with a gamepad controlled that emulate mouse.
