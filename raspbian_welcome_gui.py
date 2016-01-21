@@ -100,7 +100,9 @@ def execute_command_sequence(commands_sequence, enable_stdlog=False):
                 if enable_stdlog:
                     logging.debug('Enabled standard output/error logging')
                     now = time.strftime("%Y%m%d_%H%M%S")
-                    with open(os.getcwd() + "/output-" + now + ".out", "wb") as out, open(os.getcwd() + "/error-" + now + ".out", "wb") as err:
+                    out_filename = os.getcwd() + "/output-" + now + ".out"
+                    err_filename = os.getcwd() + "/error-" + now + ".out"
+                    with open(out_filename, "wb") as out, open(err_filename, "wb") as err:
                         Popen(one_command, stdin=input, stdout=out, stderr=err)
                 else:
                     Popen(one_command, stdin=input)
