@@ -1,11 +1,3 @@
-__author__ = "Vincenzo Marrazzo"
-__copyright__ = "Copyright 2016"
-__credits__ = ["Vincenzo Marrazzo"]
-__license__ = "LGPL"
-__version__ = "1.0.0"
-__maintainer__ = "Vincenzo Marrazzo"
-__email__ = "pariamentz@gmail.com"
-
 from Tkinter import *
 from tkFont import *
 from subprocess import *
@@ -14,6 +6,14 @@ import logging
 import os
 import sys
 import time
+
+__author__ = "Vincenzo Marrazzo"
+__copyright__ = "Copyright 2016"
+__credits__ = ["Vincenzo Marrazzo"]
+__license__ = "LGPL"
+__version__ = "1.0.0"
+__maintainer__ = "Vincenzo Marrazzo"
+__email__ = "pariamentz@gmail.com"
 
 # Session handled via UI
 session_names = ['Raspbian', 'Kodi Media Center', 'Emulation Station']
@@ -39,18 +39,22 @@ class RaspbianWelcomeGui:
     """
 
     def click(self, commands):
-        """Callback to handle click events"""
+        """Callback to handle click events
+
+        Args:
+            commands: command sequence for click event
+        """
         logging.debug('Execute commands related session %s' % commands)
         if commands:
-            execute_command_sequence(commands, self.enable_stdlog)
+            self.__low_level_execute_command__(commands)
         logging.info("Stopping GUI")
         self.root.destroy()
 
-    def __init__(self, save_on_file_stdlog=False):
+    def __init__(self, std_log_on_file=False):
         """Create a root Tkinter instance to contain our App"""
 
         self.root = Tk()
-        self.enable_stdlog = save_on_file_stdlog
+        self.enable_std_log = std_log_on_file
 
         logging.info('Starting GUI')
 
@@ -82,34 +86,37 @@ class RaspbianWelcomeGui:
     def handle_event(self):
         self.root.mainloop()
 
+    def __low_level_execute_command__(self, commands_sequence):
+            """Execute a sequence of command and handle exception
 
-def execute_command_sequence(commands_sequence, enable_stdlog=False):
-    """Execute a sequence of command and handle exception"""
-    for one_command in commands_sequence:
-        try:
-            logging.debug("Execute command '%s'" % ' '.join(one_command))
+            Args:
+                commands_sequence: a string list with command sequence to be executed
+            """
+            for one_command in commands_sequence:
+                try:
+                    logging.debug("Execute command '%s'" % ' '.join(one_command))
 
-            if one_command[0] == 'sudo':
-                logging.debug('Execute with sudo password')
-                command_to_send = "sudo -S %s" % (' '.join(one_command[1:]))
-                logging.debug("Command with sudo correction '%s'" %
-                              command_to_send)
-                os.popen(command_to_send, 'w').write('raspberry\n')
-            else:
-                #input = open('/dev/tty', 'r')
-                input = None
-                if enable_stdlog:
-                    logging.debug('Enabled standard output/error logging')
-                    now = time.strftime("%Y%m%d_%H%M%S")
-                    out_filename = os.getcwd() + "/output-" + now + ".out"
-                    err_filename = os.getcwd() + "/error-" + now + ".out"
-                    with open(out_filename, "wb") as out, open(err_filename, "wb") as err:
-                        Popen(one_command, stdin=input, stdout=out, stderr=err)
-                else:
-                    Popen(one_command, stdin=input)
-        except OSError:
-            logging.error("During command '%s'" % ' '.join(one_command))
-            logging.error("Unexpected error: %s " % sys.exc_info()[1])
+                    if one_command[0] == 'sudo':
+                        logging.debug('Execute with sudo password')
+                        command_to_send = "sudo -S %s" % (' '.join(one_command[1:]))
+                        logging.debug("Command with sudo correction '%s'" %
+                                      command_to_send)
+                        os.popen(command_to_send, 'w').write('raspberry\n')
+                    else:
+                        # input_stream = open('/dev/tty', 'r')
+                        input_stream = None
+                        if self.enable_std_log:
+                            logging.debug('Enabled standard output/error logging')
+                            now = time.strftime("%Y%m%d_%H%M%S")
+                            out_filename = os.getcwd() + "/output-" + now + ".out"
+                            err_filename = os.getcwd() + "/error-" + now + ".out"
+                            with open(out_filename, "wb") as out, open(err_filename, "wb") as err:
+                                Popen(one_command, stdin=input_stream, stdout=out, stderr=err)
+                        else:
+                            Popen(one_command, stdin=input_stream)
+                except OSError:
+                    logging.error("During command '%s'" % ' '.join(one_command))
+                    logging.error("Unexpected error: %s " % sys.exc_info()[1])
 
 
 def main():
@@ -131,10 +138,9 @@ def main():
 
     # separate thread that wait 60 seconds
     # after timeout it starts kodi as default option
-    commands = session_commands[default_session]
-    timer = Timer(60, lambda arg=commands: [logging.debug('Timeout occurs'),
-                                            gui.click(arg)])
-    timer.dameon = True
+    timer = Timer(60,
+                  lambda arg=session_commands[default_session]: [logging.debug('Timeout occurs'), gui.click(arg)])
+    timer.daemon = True
 
     try:
         # start timer
