@@ -125,12 +125,11 @@ def main():
 
        Args: --debug (optional) : save on file the stdout/stderr of choiced application.
     """
-    # logging related to UI functionality, enable for debug UI purpose
-    # logging.basicConfig(filename='gui_execution.log',
-    #                    level=logging.DEBUG,
-    # format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
-
+    # command line argument to enable logging facility
     if len(sys.argv) > 1 and sys.argv[1] == '--debug':
+        logging.basicConfig(filename='gui_execution.log',
+                            level=logging.DEBUG,
+                            format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
         logging.info("Enable save on file std output/error.")
         gui = RaspbianWelcomeGui(True)
     else:
@@ -139,7 +138,8 @@ def main():
     # separate thread that wait 60 seconds
     # after timeout it starts kodi as default option
     timer = Timer(60,
-                  lambda arg=session_commands[default_session]: [logging.debug('Timeout occurs'), gui.click(arg)])
+                  lambda: [logging.debug('Timeout occurs'),
+                           gui.click(session_commands[default_session])])
     timer.daemon = True
 
     try:
